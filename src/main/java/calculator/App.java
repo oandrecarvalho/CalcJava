@@ -7,6 +7,13 @@ import java.util.logging.Level;
 public class App {
     private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 
+    /**
+     * Classe utilitária com ponto de entrada da aplicação.
+     * O construtor é privado porque não há necessidade de instanciar App.
+     */
+    private App() {
+        // Impede instanciação
+    }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Calculator calc = new Calculator();

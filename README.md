@@ -339,16 +339,9 @@ Com isso, Jacoco atinge **100% de cobertura** nas classes principais.
 
 ---
 
-# 🏁 12. Conclusão
-
-Este projeto demonstra:
-
-* Aplicação clara de **Design Patterns (Strategy)**
-* Uso correto de princípios de **Clean Code**
-* **Testes automatizados** com alta cobertura
-* **Jacoco** integrado e funcionando
-* **SonarQube** analisando código de forma profissional
-
-Ideal para apresentações, avaliações e estudos de boas práticas.
-
-Se quiser adicionar **logs, validações, Factory Pattern, UI no console**, posso te ajudar também.
+```
+para rodar: 
+mvn clean verify sonar:sonar \
+-Dsonar.login='squ_cc0aeb71877f0e315cc176752d141984c2b9cf38' \
+-Dsonar.host.url=http://localhost:9000 \
+-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml

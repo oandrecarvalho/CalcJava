@@ -1,5 +1,6 @@
 package calculator;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -26,5 +27,13 @@ class AppTest {
     void testMain_shouldNotThrow(String simulatedInput) {
         System.setIn(new ByteArrayInputStream(simulatedInput.getBytes()));
         assertDoesNotThrow(() -> App.main(new String[]{}));
+    }
+
+    @Test
+    void testPrivateConstructor_shouldNotThrow() throws Exception {
+        var constructor = App.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        assertDoesNotThrow(() -> constructor.newInstance());
     }
 }
