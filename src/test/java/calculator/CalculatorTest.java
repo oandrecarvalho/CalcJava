@@ -3,33 +3,20 @@ package calculator;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+class CalculatorTest {
 
-public class CalculatorTest {
-    private final Calculator calc = new Calculator();
-
-    //Sum
     @Test
-    void testSum() {
-        assertEquals(5, calc.calculate(2, 3, new Sum()));
+    void testCalculatorUsesOperation() {
+        Calculator calc = new Calculator();
+        double result = calc.calculate(10, 5, new Sum());
+        assertEquals(15, result);
     }
 
-    //Subtraction
     @Test
-    void testSubtract() {
-        assertEquals(2, calc.calculate(5, 3, new Subtraction()));
+    void testCalculatorDifferentOperations() {
+        Calculator calc = new Calculator();
+        assertEquals(5, calc.calculate(8, 3, new Subtraction()));
+        assertEquals(24, calc.calculate(6, 4, new Mult()));
+        assertEquals(4, calc.calculate(20, 5, new Division()));
     }
-
-    //Multiplication
-    @Test
-    void testMultiply() {
-        assertEquals(20, calc.calculate(4, 5, new Mult()));
-    }
-
-    //Division
-    @Test
-    void testDivide() {
-        assertEquals(10, calc.calculate(20, 2, new Division()));
-    }
-
-
 }

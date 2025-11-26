@@ -1,10 +1,43 @@
 package calculator;
 
-public class App {
-    public static void main(String[] args) {
-        Calculator calc = new Calculator();
+import java.util.Scanner;
+import java.util.logging.Logger;
 
-        double result = calc.calculate(5, 3, new calculator.Subtraction());
-        System.out.println("Sum result: " + result);
+public class App {
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Calculator calc = new Calculator();
+        OperationFactory factory = new OperationFactory();
+
+        LOGGER.info("=== Calculator ===");
+
+        // Entrada do usuário deve ser com System.out.print
+        System.out.print("Digite o primeiro número: ");
+        double a = scanner.nextDouble();
+
+        System.out.print("Digite o segundo número: ");
+        double b = scanner.nextDouble();
+
+        System.out.println("\nEscolha a operação:");
+        System.out.println("1 - Soma");
+        System.out.println("2 - Subtração");
+        System.out.println("3 - Multiplicação");
+        System.out.println("4 - Divisão");
+        System.out.print("Opção: ");
+
+        int opcao = scanner.nextInt();
+
+        try {
+            Operation op = factory.getOperation(opcao, b);
+            double result = calc.calculate(a, b, op);
+            LOGGER.info("Resultado: " + result);
+
+        } catch (Exception e) {
+            LOGGER.severe("Erro: " + e.getMessage());
+        }
+
+        scanner.close();
     }
 }
