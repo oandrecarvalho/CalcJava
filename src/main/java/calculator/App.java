@@ -14,7 +14,6 @@ public class App {
 
         LOGGER.info("=== Calculator ===");
 
-        // Entrada do usuário deve ser com System.out.print
         LOGGER.info("Digite o primeiro número: ");
         double a = scanner.nextDouble();
 
