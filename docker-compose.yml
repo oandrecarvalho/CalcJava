@@ -1,0 +1,19 @@
+services:
+  sonarqube:
+    image: sonarqube:lts
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_JAVAOPTS: "-Xms512m -Xmx1g"
+      JAVA_OPTS: "-Xmx1.5g"
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
