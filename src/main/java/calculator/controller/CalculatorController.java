@@ -83,4 +83,40 @@ public class CalculatorController {
         double result = division.execute(valor1, valor2);
         return Response.ok(String.valueOf(result)).build();
     }
+
+    @GET
+    @Path("/expr")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response expr(@QueryParam("expression") String expression) {
+        if (expression == null || expression.isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("A expressão não pode estar vazia!")
+                    .build();
+        }
+
+        try {
+            String exp = expression
+                    .replace("×", "*")
+                    .replace("÷", "/")
+                    .replace(",", ".")
+                    .replace(" ", "");
+
+            if (!exp.matches("[0-9+\\-*/().]+")) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Expressão inválida!")
+                        .build();
+            }
+
+            javax.script.ScriptEngine engine = new javax.script.ScriptEngineManager().getEngineByName("JavaScript");
+
+            Object result = engine.eval(exp);
+
+            return Response.ok(result.toString()).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Erro ao calcular a expressão!")
+                    .build();
+        }
+    }
 }

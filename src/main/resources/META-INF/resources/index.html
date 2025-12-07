@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>API Calculator UI</title>
+
+    <style>
+        body {
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .calc-container {
+            width: 340px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px #000;
+        }
+
+        .display {
+            width: 100%;
+            height: 80px;
+            background: #000;
+            color: #00ff00;
+            font-size: 2.2rem;
+            padding: 10px;
+            text-align: right;
+            border-radius: 10px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 70px;
+            font-size: 1.6rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            transition: 0.15s;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        .op {
+            background: #0059ff;
+        }
+
+        .op:hover {
+            background: #0a6bff;
+        }
+
+        .equals {
+            background: #00c853;
+            grid-column: span 2;
+        }
+
+        .equals:hover {
+            background: #00e05f;
+        }
+
+        .clear {
+            background: #ff1744;
+        }
+
+        .clear:hover {
+            background: #ff4567;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <div id="display" class="display">0</div>
+
+    <div class="buttons">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button onclick="append('(')">(</button>
+        <button onclick="append(')')">)</button>
+        <button class="op" onclick="setOp('division')">÷</button>
+
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button class="op" onclick="setOp('mult')">×</button>
+
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button class="op" onclick="setOp('sub')">-</button>
+
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button class="op" onclick="setOp('sum')">+</button>
+
+        <button onclick="append('0')">0</button>
+        <button onclick="append('.')">.</button>
+        <button class="equals" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    function append(value) {
+        const display = document.getElementById("display");
+
+        if (display.textContent === "0") {
+            display.textContent = value;
+        } else {
+            display.textContent += value;
+        }
+    }
+
+    // setOp usa o HÍFEN ASCII "-" (não o signo Unicode "−")
+    function setOp(op) {
+        const display = document.getElementById("display");
+
+        let symbol = "";
+
+        switch (op) {
+            case "sum": symbol = " + "; break;
+            case "sub": symbol = " - "; break;      // <-- ASCII hyphen here
+            case "mult": symbol = " × "; break;     // multiplication uses × (keeps visual)
+            case "division": symbol = " ÷ "; break;
+        }
+
+        // Se o display terminar com operador, substitui
+        if (/[+\-×÷]\s*$/.test(display.textContent)) {
+            display.textContent = display.textContent.replace(/[+\-×÷]\s*$/, symbol);
+        } else {
+            display.textContent += symbol;
+        }
+    }
+
+    function backspace() {
+        const display = document.getElementById("display");
+        display.textContent = display.textContent.slice(0, -1) || "0";
+    }
+
+    function clearDisplay() {
+        document.getElementById("display").textContent = "0";
+    }
+
+    async function calculate() {
+        let exp = document.getElementById("display").textContent.trim();
+
+        // Se for expressão complexa (parênteses ou múltiplos operadores) delega ao backend /expr
+        if (/[()]/.test(exp) || /[+\-×÷].*[+\-×÷]/.test(exp)) {
+            return calcularExpressao(exp);
+        }
+
+        // Expressão simples: capturar número operador número
+        // O grupo de operador aceita tanto o hífen ASCII '-' quanto o sinal unicode '−' por segurança
+        let match = exp.match(/([\d.]+)\s*([+\-−×÷])\s*([\d.]+)/);
+
+        if (!match) return;
+
+        let value1 = match[1];
+        let op = match[2];
+        let value2 = match[3];
+
+        // Normalizar operador (se veio em unicode, converte para a forma usada nas rotas)
+        let rota = "";
+        switch (op) {
+            case "+": rota = "sum"; break;
+            case "−": // unicode minus fallback
+            case "-": rota = "sub"; break;
+            case "×": rota = "mult"; break;
+            case "÷": rota = "division"; break;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:8080/calc/${rota}?valor1=${encodeURIComponent(value1)}&valor2=${encodeURIComponent(value2)}`);
+            const text = await res.text();
+
+            if (!res.ok) {
+                alert("Erro: " + text);
+                return;
+            }
+
+            document.getElementById("display").textContent = text;
+        } catch (err) {
+            alert("Erro ao conectar à API.");
+        }
+    }
+
+    async function calcularExpressao(exp) {
+        // envia a expressão completa para o backend (endpoint /calc/expr)
+        const encoded = encodeURIComponent(exp);
+        try {
+            const res = await fetch(`http://localhost:8080/calc/expr?expression=${encoded}`);
+            const text = await res.text();
+
+            if (!res.ok) {
+                alert("Erro: " + text);
+                return;
+            }
+
+            document.getElementById("display").textContent = text;
+        } catch (err) {
+            alert("Erro ao conectar à API.");
+        }
+    }
+
+    // teclado
+    document.addEventListener("keydown", e => {
+        const key = e.key;
+
+        if (/[0-9]/.test(key)) append(key);
+
+        // quando usuário usa teclado, mapeamos para a mesma função setOp
+        if (["+", "-", "*", "/"].includes(key)) {
+            setOp(
+                key === "+" ? "sum" :
+                key === "-" ? "sub" :
+                key === "*" ? "mult" :
+                "division"
+            );
+            e.preventDefault();
+        }
+
+        if (key === "Enter") {
+            calculate();
+            e.preventDefault();
+        }
+        if (key === "Backspace") {
+            backspace();
+            e.preventDefault();
+        }
+        if (key === "Escape") {
+            clearDisplay();
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>
