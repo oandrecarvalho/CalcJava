@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.StringContains.containsString;
 
 @QuarkusTest
 class CalculatorControllerTest {
@@ -147,5 +148,60 @@ class CalculatorControllerTest {
                 .when().get("/calc/division")
                 .then().statusCode(400)
                 .body(is("Divisão por zero não é permitida!"));
+    }
+
+    @Test
+    public void testExpressionSimple() {
+        given()
+                .queryParam("expression", "3+4*2")
+                .when()
+                .get("/calc/expr")
+                .then()
+                .statusCode(200)
+                .body(is("11.0"));
+    }
+
+    @Test
+    public void testExpressionParentheses() {
+        given()
+                .queryParam("expression", "(8-1)+(2+3)")
+                .when()
+                .get("/calc/expr")
+                .then()
+                .statusCode(200)
+                .body(is("12.0"));
+    }
+
+    @Test
+    public void testExpressionNestedParentheses() {
+        given()
+                .queryParam("expression", "((8-1)*2)+3")
+                .when()
+                .get("/calc/expr")
+                .then()
+                .statusCode(200)
+                .body(is("17.0"));
+    }
+
+    @Test
+    public void testExpressionInvalid() {
+        given()
+                .queryParam("expression", "7+abc")
+                .when()
+                .get("/calc/expr")
+                .then()
+                .statusCode(400)
+                .body(containsString("Expressão inválida!"));
+    }
+
+    @Test
+    public void testExpressionEmpty() {
+        given()
+                .queryParam("expression", "")
+                .when()
+                .get("/calc/expr")
+                .then()
+                .statusCode(400)
+                .body(is("A expressão não pode estar vazia!"));
     }
 }
